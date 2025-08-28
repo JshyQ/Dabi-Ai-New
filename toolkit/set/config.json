@@ -25,7 +25,7 @@
     "footer": "© 𝑫𝒂𝒃𝒊𝑳𝒊𝒏𝒆𝒔",
     "thumbnail": "https://files.catbox.moe/qvescq.jpg",
     "sendTextLink": {
-      "chshort": "https://whatsapp.com/channel/0029Van8WHGEAKW8OUDniG1m",
+      "chshort": "",
       "gcshort": "",
       "music": ""
     },
@@ -77,8 +77,8 @@
   },
   "msg": {
     "rejectMsg": {
-      "isPremium": "aja sendiri",
-      "isOwner": "aja sendiri",
+      "isPremium": "tak bole",
+      "isOwner": "tak bole",
       "forOwnerText": "_PERGI LU JENDUL BIKIN KITA MUAK AJA 🤮_"
     }
   },
