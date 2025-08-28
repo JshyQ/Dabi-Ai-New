@@ -45,7 +45,7 @@
       "❲",
       "❳"
     ],
-    "idCh": "120363310100263711@newsletter",
+    "idCh": "",
     "frame": {
       "head": "┏───•",
       "body": "│",
@@ -79,7 +79,7 @@
     "rejectMsg": {
       "isPremium": "tak bole",
       "isOwner": "tak bole",
-      "forOwnerText": "_PERGI LU JENDUL BIKIN KITA MUAK AJA 🤮_"
+      "forOwnerText": "_apasih sayang_"
     }
   },
   "apiKey": {
