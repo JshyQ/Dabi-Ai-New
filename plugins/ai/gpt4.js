@@ -6,7 +6,7 @@ module.exports = {
   tags: 'Ai Menu',
   desc: 'Tanya ke GPT-4o menggunakan ChatGPT4o.one',
   prefix: true,
-  premium: false,
+  premium: true,
 
   run: async (conn, msg, {
     chatInfo,
