@@ -23,34 +23,31 @@ export default {
       }
 
       const url = Array.isArray(args) ? args[0] : args;
-     
+
       if (!url.match(/https?:\/\/(www\.)?instagram\.com\/(p|reel|stories)\/[a-zA-Z0-9_-]+\/?/i)) {
         return conn.sendMessage(chatId, { text: 'URL tidak valid! Pastikan itu adalah tautan Instagram post, reel, atau story.' }, { quoted: msg });
       }
 
       await conn.sendMessage(chatId, { text: '⏳ Sedang memproses, mohon tunggu...' }, { quoted: msg });
 
-   
-      const res = await axios.post('https://api.nekolabs.my.id/downloader/instagram', 
-        { url: url }, 
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' // Good practice to include a UA
-          }
+    
+      const apiUrl = `https://api.nekolabs.my.id/downloader/instagram?url=${encodeURIComponent(url)}`;
+      const res = await axios.get(apiUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
-      );
+      });
 
-      
-      if (!res.data.success || !res.data.data || res.data.data.length === 0) {
+     
+      if (!res.data.data || res.data.data.length === 0) {
         throw new Error('API returned no media data.');
       }
 
       const mediaArray = res.data.data;
       
-      
+
       for (const media of mediaArray) {
-      
+        
         const isVideo = media.type?.toLowerCase() === 'video' || media.url?.match(/\.mp4$/i);
         
         const fileName = `instagram_${Date.now()}.${isVideo ? 'mp4' : 'jpg'}`;
@@ -73,7 +70,7 @@ export default {
 
     } catch (error) {
       console.error('Instagram DL Error:', error);
-     
+      e
       let errorMessage = 'Terjadi kesalahan saat memproses permintaan.';
       if (error.response?.status === 404) {
         errorMessage = 'Media tidak ditemukan atau URL salah.';
