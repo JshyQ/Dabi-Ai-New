@@ -35,7 +35,7 @@ export default {
 
       // Call the API
       const apiUrl = `https://api.nekolabs.my.id/downloader/instagram?url=${encodeURIComponent(url)}`;
-      console.log('API URL:', apiUrl); // Debug log
+      console.log('🔗 API URL:', apiUrl);
       
       const res = await axios.get(apiUrl, {
         headers: {
@@ -45,44 +45,84 @@ export default {
       });
 
       // Debug: Log the full API response
-      console.log('API Response:', JSON.stringify(res.data, null, 2));
+      console.log('📦 Full API Response:', JSON.stringify(res.data, null, 2));
 
-      // Check if API returned valid data
-      if (!res.data || !res.data.data || res.data.data.length === 0) {
-        throw new Error('No media found in API response');
+      // Check if API returned success
+      if (res.data.status !== 200 && res.data.status !== true && res.data.success !== true) {
+        throw new Error(`API returned error: ${res.data.message || 'Unknown error'}`);
       }
 
-      const mediaData = res.data.data[0]; // Get first media item
+      // Try different possible response structures
+      let mediaArray = null;
       
-      // Determine media type and send appropriate message
-      if (mediaData.type === 'video' || mediaData.url.includes('.mp4')) {
-        // It's a video
+      if (Array.isArray(res.data.data)) {
+        mediaArray = res.data.data;
+      } else if (Array.isArray(res.data.result)) {
+        mediaArray = res.data.result;
+      } else if (Array.isArray(res.data.media)) {
+        mediaArray = res.data.media;
+      } else if (res.data.data && typeof res.data.data === 'object') {
+        // Handle single object response
+        mediaArray = [res.data.data];
+      } else if (res.data.result && typeof res.data.result === 'object') {
+        mediaArray = [res.data.result];
+      }
+
+      console.log('📊 Parsed media array:', mediaArray);
+
+      if (!mediaArray || mediaArray.length === 0) {
+        throw new Error('No media found in API response. Response structure: ' + JSON.stringify(res.data));
+      }
+
+      const mediaData = mediaArray[0];
+      console.log('🎬 Media data:', mediaData);
+
+      // Find the actual media URL - try different possible keys
+      let mediaUrl = mediaData.url || mediaData.downloadUrl || mediaData.mediaUrl || mediaData.hd_url || mediaData.sd_url;
+      
+      if (!mediaUrl) {
+        throw new Error('No media URL found in response. Available keys: ' + Object.keys(mediaData).join(', '));
+      }
+
+      console.log('🔗 Media URL:', mediaUrl);
+
+      // Determine media type
+      const isVideo = mediaData.type === 'video' || 
+                     mediaUrl.includes('.mp4') || 
+                     (mediaData.mediaType && mediaData.mediaType.toLowerCase() === 'video');
+
+      // Send the media
+      if (isVideo) {
         await conn.sendMessage(chatId, {
-          video: { url: mediaData.url },
+          video: { url: mediaUrl },
           mimetype: 'video/mp4',
-          caption: mediaData.caption || 'Instagram Video',
+          caption: mediaData.caption || mediaData.title || 'Instagram Video',
           fileName: `instagram_${Date.now()}.mp4`
         }, { quoted: msg });
       } else {
-        // It's an image
         await conn.sendMessage(chatId, {
-          image: { url: mediaData.url },
-          caption: mediaData.caption || 'Instagram Photo'
+          image: { url: mediaUrl },
+          caption: mediaData.caption || mediaData.title || 'Instagram Photo'
         }, { quoted: msg });
       }
 
     } catch (error) {
-      console.error('Instagram Download Error:', error);
+      console.error('❌ Instagram Download Error:', error);
       
       let errorMessage = '❌ Failed to download media. ';
       
       if (error.response) {
         // API returned error status
-        errorMessage += `API Error: ${error.response.status} - ${error.response.data?.message || 'Unknown error'}`;
+        errorMessage += `API Error: ${error.response.status} - ${error.response.data?.message || JSON.stringify(error.response.data)}`;
       } else if (error.code === 'ECONNABORTED') {
         errorMessage += 'Request timeout. Please try again.';
       } else {
         errorMessage += error.message || 'Unknown error occurred';
+      }
+      
+      // Truncate very long error messages
+      if (errorMessage.length > 500) {
+        errorMessage = errorMessage.substring(0, 500) + '...';
       }
       
       conn.sendMessage(msg.key.remoteJid, { 
