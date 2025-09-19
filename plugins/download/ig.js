@@ -1,4 +1,4 @@
-import { igdl } from 'ruhend-scraper';
+import axios from 'axios';
 
 export default {
   name: 'instagram',
@@ -29,8 +29,12 @@ export default {
 
       await conn.sendMessage(chatId, { text: '⏳ Sedang memproses, mohon tunggu...' }, { quoted: msg });
 
-      const res = await igdl(url);
-      const media = res.data?.[0];
+      // Call Nekolabs API
+      const res = await axios.get('https://api.nekolabs.my.id/downloader/instagram', {
+        params: { url }
+      });
+
+      const media = res.data?.data?.[0];
 
       if (!media) {
         return conn.sendMessage(chatId, { text: 'Media tidak ditemukan atau URL salah.' }, { quoted: msg });
