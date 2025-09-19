@@ -3,83 +3,91 @@ import axios from 'axios';
 export default {
   name: 'instagram',
   command: ['instagram', 'ig', 'igdl', 'instegrem', 'insta'],
-  tags: 'Download Menu',
-  desc: 'Mengunduh video atau foto dari Instagram',
+  tags: 'download',
+  desc: 'Download media from Instagram',
   prefix: true,
   premium: false,
 
-  run: async (conn, msg, {
-    chatInfo,
-    args,
-    prefix,
-    commandText
-  }) => {
+  run: async (conn, msg, { chatInfo, args, prefix, commandText }) => {
     try {
-      const { chatId } = chatInfo;
-      if (!args || (Array.isArray(args) && !args[0])) {
+      const { chatId, senderId } = chatInfo;
+      
+      // Check if URL is provided
+      if (!args || !args[0]) {
         return conn.sendMessage(chatId, {
-          text: `Masukkan URL Instagram! Contoh: *${prefix}${commandText} https://www.instagram.com/p/C1Ck8sENM94/*`
+          text: `Please provide Instagram URL!\nExample: *${prefix}${commandText} https://www.instagram.com/p/C1Ck8sENM94/*`
         }, { quoted: msg });
       }
 
-      const url = Array.isArray(args) ? args[0] : args;
-
+      const url = args[0];
+      
+      // Validate Instagram URL
       if (!url.match(/https?:\/\/(www\.)?instagram\.com\/(p|reel|stories)\/[a-zA-Z0-9_-]+\/?/i)) {
-        return conn.sendMessage(chatId, { text: 'URL tidak valid! Pastikan itu adalah tautan Instagram post, reel, atau story.' }, { quoted: msg });
+        return conn.sendMessage(chatId, { 
+          text: 'Invalid URL! Please provide a valid Instagram post, reel, or story link.' 
+        }, { quoted: msg });
       }
 
-      await conn.sendMessage(chatId, { text: '⏳ Sedang memproses, mohon tunggu...' }, { quoted: msg });
+      // Send processing message
+      await conn.sendMessage(chatId, { 
+        text: '⏳ Processing your request...' 
+      }, { quoted: msg });
 
-    
+      // Call the API
       const apiUrl = `https://api.nekolabs.my.id/downloader/instagram?url=${encodeURIComponent(url)}`;
+      console.log('API URL:', apiUrl); // Debug log
+      
       const res = await axios.get(apiUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
+        },
+        timeout: 30000
       });
 
-     
-      if (!res.data.data || res.data.data.length === 0) {
-        throw new Error('API returned no media data.');
+      // Debug: Log the full API response
+      console.log('API Response:', JSON.stringify(res.data, null, 2));
+
+      // Check if API returned valid data
+      if (!res.data || !res.data.data || res.data.data.length === 0) {
+        throw new Error('No media found in API response');
       }
 
-      const mediaArray = res.data.data;
+      const mediaData = res.data.data[0]; // Get first media item
       
-
-      for (const media of mediaArray) {
-        
-        const isVideo = media.type?.toLowerCase() === 'video' || media.url?.match(/\.mp4$/i);
-        
-        const fileName = `instagram_${Date.now()}.${isVideo ? 'mp4' : 'jpg'}`;
-        const caption = media.caption || `Instagram ${isVideo ? 'Video' : 'Photo'}`;
-
-        if (isVideo) {
-          await conn.sendMessage(chatId, {
-            video: { url: media.url },
-            mimetype: 'video/mp4',
-            fileName: fileName,
-            caption: caption
-          }, { quoted: msg });
-        } else {
-          await conn.sendMessage(chatId, {
-            image: { url: media.url },
-            caption: caption
-          }, { quoted: msg });
-        }
+      // Determine media type and send appropriate message
+      if (mediaData.type === 'video' || mediaData.url.includes('.mp4')) {
+        // It's a video
+        await conn.sendMessage(chatId, {
+          video: { url: mediaData.url },
+          mimetype: 'video/mp4',
+          caption: mediaData.caption || 'Instagram Video',
+          fileName: `instagram_${Date.now()}.mp4`
+        }, { quoted: msg });
+      } else {
+        // It's an image
+        await conn.sendMessage(chatId, {
+          image: { url: mediaData.url },
+          caption: mediaData.caption || 'Instagram Photo'
+        }, { quoted: msg });
       }
 
     } catch (error) {
-      console.error('Instagram DL Error:', error);
-      e
-      let errorMessage = 'Terjadi kesalahan saat memproses permintaan.';
-      if (error.response?.status === 404) {
-        errorMessage = 'Media tidak ditemukan atau URL salah.';
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
+      console.error('Instagram Download Error:', error);
+      
+      let errorMessage = '❌ Failed to download media. ';
+      
+      if (error.response) {
+        // API returned error status
+        errorMessage += `API Error: ${error.response.status} - ${error.response.data?.message || 'Unknown error'}`;
+      } else if (error.code === 'ECONNABORTED') {
+        errorMessage += 'Request timeout. Please try again.';
+      } else {
+        errorMessage += error.message || 'Unknown error occurred';
       }
-      conn.sendMessage(msg.key.remoteJid, { text: errorMessage }, { quoted: msg });
+      
+      conn.sendMessage(msg.key.remoteJid, { 
+        text: errorMessage 
+      }, { quoted: msg });
     }
   }
 };
