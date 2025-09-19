@@ -81,8 +81,8 @@
   },
   "msg": {
     "rejectMsg": {
-      "isPremium": "tak bole",
-      "isOwner": "bole tak",
+      "isPremium": "",
+      "isOwner": "",
       "forOwnerText": ""
     }
   },
