@@ -12,7 +12,7 @@ function isMuslimAiOn(chatId) {
 export default {
   name: 'muslimai',
   command: ['muslimai', 'muslim-ai'],
-  tags: 'Islamic',
+  tags: 'Ai Menu',
   desc: 'Ask a question to Muslim AI or turn auto reply on/off with ".muslimai on/off"',
   prefix: true,
   owner: false,
