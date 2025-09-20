@@ -7,7 +7,7 @@ export default {
   tags: 'Nsfw Menu',
   desc: 'Cari gambar random dari rule34 berdasarkan tag',
   prefix: true,
-  premium: false,
+  premium: true,
 
   run: async (conn, msg, {
     chatInfo,
