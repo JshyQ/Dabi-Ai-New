@@ -27,8 +27,7 @@ export default {
       const apiUrl = `https://izumiiiiiiii.dpdns.org/ai/muslim-ai?text=${encodeURIComponent(query)}`;
       const { data } = await axios.get(apiUrl);
 
-      
-      let replyText = typeof data === "string" ? data : data.result || data.answer || "❌ Tidak ada jawaban dari API.";
+      let replyText = (data && data.message) ? data.message : "❌ Tidak ada jawaban dari Muslim AI.";
 
       await conn.sendMessage(chatId, { text: replyText, quoted: msg });
       await conn.sendMessage(chatId, { react: { text: "🧕🏻", key: msg.key } });
