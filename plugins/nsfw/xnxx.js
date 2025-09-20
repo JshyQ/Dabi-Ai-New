@@ -6,8 +6,8 @@ export default {
   tags: 'Nsfw Menu',
   desc: 'Send XNXX video by direct URL or by keyword/tag search',
   prefix: true,
-  owner: false,
-  premium: false,
+  owner: true,
+  premium: true,
 
   run: async (conn, msg, { chatInfo, args }) => {
     const { chatId } = chatInfo;
