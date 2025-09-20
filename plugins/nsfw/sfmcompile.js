@@ -8,7 +8,7 @@ export default {
   desc: 'Send a random SFM video from sfmcompile.club, supports keyword search.',
   prefix: true,
   owner: false,
-  premium: true,
+  premium: false,
 
   run: async (conn, msg, { chatInfo, args }) => {
     const { chatId } = chatInfo;
