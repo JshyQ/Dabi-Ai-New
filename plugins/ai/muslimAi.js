@@ -3,7 +3,7 @@ import axios from 'axios';
 export default {
   name: 'muslimai',
   command: ['muslimai', 'muslim-ai'],
-  tags: 'Islamic',
+  tags: 'Ai Menu',
   desc: 'Ask a question to Muslim AI',
   prefix: true,
   owner: false,
