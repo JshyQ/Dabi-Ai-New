@@ -4,25 +4,23 @@ export default {
   name: 'xnxx',
   command: ['xnxx'],
   tags: 'Nsfw Menu',
-  desc: 'Send XNXX video by direct URL or keyword/tag',
+  desc: 'Send XNXX video by direct URL or by keyword/tag search',
   prefix: true,
   owner: false,
   premium: false,
 
   run: async (conn, msg, { chatInfo, args }) => {
     const { chatId } = chatInfo;
-    const input = args[0];
-
+    const input = args.join(" ");
     if (!input) {
       return conn.sendMessage(chatId, {
         text: '❌ Masukkan link XNXX yang valid atau keyword!\nContoh: xnxx https://www.xnxx.com/video-xxxx/ atau xnxx japanese',
       }, { quoted: msg });
     }
 
-    let videoUrl;
     let videoPageUrl;
 
-    
+   
     if (/^https?:\/\/(www\.)?xnxx\.com\/video-/.test(input)) {
       videoPageUrl = input;
     } else {
@@ -54,7 +52,7 @@ export default {
         params: { url: videoPageUrl }
       });
       const result = res.data?.result;
-      videoUrl = result?.download?.high || result?.download?.low;
+      const videoUrl = result?.download?.high || result?.download?.low;
 
       if (!videoUrl) {
         await conn.sendMessage(chatId, { react: { text: "", key: msg.key } });
