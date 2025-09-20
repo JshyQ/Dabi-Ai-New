@@ -1,6 +1,6 @@
 export default {
   name: 'asu',
-  command: ['asu'],
+  command: ['blow'],
   tags: 'Nsfw Menu',
   desc: 'Send random NSFW image',
   prefix: true,
@@ -71,6 +71,6 @@ export default {
     function pickRandom(list) {
       return list[Math.floor(Math.random() * list.length)];
     }
-    await conn.sendMessage(chatInfo.chatId, { image: { url: pickRandom(attachments) }, caption: '_Random asu_' }, { quoted: msg });
+    await conn.sendMessage(chatInfo.chatId, { image: { url: pickRandom(attachments) }, caption: '_Random blow_' }, { quoted: msg });
   }
 }
