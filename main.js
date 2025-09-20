@@ -19,6 +19,9 @@ import Cc from "./session/setCfg.js";
 import { cekSholat } from "./toolkit/pengingat.js";
 import emtData from "./toolkit/transmitter.js";
 
+// === ADD: Import MuslimAI plugin for toggle support ===
+import muslimAiPlugin from "./plugins/muslimai.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -36,7 +39,6 @@ global.plugins = {};
 global.categories = {};
 global.lidCache = {};
 global.initDB();
-
 
 setInterval(async () => {
   const now = Date.now();
@@ -153,6 +155,58 @@ const startBot = async () => {
         return;
       }
 
+      const { chatId, isGroup, senderId, pushName } = exCht(msg);
+
+      if (isGroup) {
+        const meta = await getMetadata(chatId, conn);
+        if (meta) {
+          await saveLidCache(meta);
+        }
+      }
+
+      replaceLid(msg);
+      const { textMessage, mediaInfo } = messageContent(msg);
+      if (!textMessage && !mediaInfo) return;
+
+      
+      try {
+        
+        
+        const ctxInfo = msg.message?.extendedTextMessage?.contextInfo;
+        const isReplyToBot =
+          ctxInfo &&
+          (
+            ctxInfo.participant === botNumber ||
+            ctxInfo.participant === conn.user?.id ||
+            (ctxInfo.participant || "").includes(botNumber.split("@")[0])
+          );
+
+        
+        if (isReplyToBot && !textMessage.startsWith(".")) {
+          
+          if (!muslimAiPlugin.isMuslimAiOn(chatId)) return;
+
+        
+          await conn.sendMessage(chatId, { react: { text: "🕋", key: msg.key } });
+
+          try {
+            const apiUrl = `https://izumiiiiiiii.dpdns.org/ai/muslim-ai?text=${encodeURIComponent(textMessage)}`;
+            const { data } = await axios.get(apiUrl);
+            const replyText = (data && data.message) ? data.message : "❌ Tidak ada jawaban dari Muslim AI.";
+            await conn.sendMessage(chatId, { text: replyText, quoted: msg });
+            await conn.sendMessage(chatId, { react: { text: "🧕🏻", key: msg.key } });
+          } catch (error) {
+            await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
+            await conn.sendMessage(chatId, {
+              text: '❌ Gagal mendapatkan jawaban dari Muslim AI.',
+              quoted: msg
+            });
+          }
+          return; 
+        }
+      } catch (err) {
+        
+      }
       
 
       if (isGroup) {
@@ -180,6 +234,7 @@ const startBot = async () => {
           }
         }
       }
+     
 
       const msgId = msg.key?.id;
       if (["conversation", "extendedTextMessage", "imageMessage", "videoMessage"].some((t) => msg.message?.[t])) {
