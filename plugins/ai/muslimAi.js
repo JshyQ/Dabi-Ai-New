@@ -1,36 +1,39 @@
 import axios from 'axios';
 
 
-function isFromBot(msg, conn) {
-  if (!msg.quoted) return false;
+const muslimAiState = {};
+
+
+function isMuslimAiOn(chatId) {
   
-  const quotedSender = msg.quoted.sender || msg.quoted.from || "";
-  const botId = (conn.user?.id || conn.user?.jid || conn.user?.username || "").replace(/[^0-9@]/g, "");
-  return quotedSender && botId && quotedSender.includes(botId);
+  return muslimAiState[chatId] !== false;
 }
 
 export default {
   name: 'muslimai',
   command: ['muslimai', 'muslim-ai'],
-  tags: 'Ai Menu',
-  desc: 'Ask a question to Muslim AI or just reply to the bot message!',
+  tags: 'Islamic',
+  desc: 'Ask a question to Muslim AI or turn auto reply on/off with ".muslimai on/off"',
   prefix: true,
   owner: false,
   premium: false,
 
   run: async (conn, msg, { chatInfo, args }) => {
     const { chatId } = chatInfo;
+    const query = args.join(" ").trim().toLowerCase();
 
-   
-    let question = args.join(" ").trim();
-    const isReplyToBot = msg.quoted && isFromBot(msg, conn);
-
-    if (!question && isReplyToBot) {
-      
-      question = msg.body?.trim() || msg.text?.trim();
+    
+    if (query === "on" || query === "off") {
+      muslimAiState[chatId] = query === "on";
+      await conn.sendMessage(chatId, {
+        text: `🧕🏻 Fitur MuslimAI auto-reply telah *${query === "on" ? "diaktifkan" : "dinonaktifkan"}* untuk chat ini.`,
+        quoted: msg
+      });
+      return;
     }
 
-    if (!question) {
+    
+    if (!query) {
       return conn.sendMessage(chatId, {
         text: '❌ Masukkan pertanyaan untuk Muslim AI.\nContoh: .muslimai Siapa itu Nabi Muhammad?\nAtau balas (reply) pesan bot ini dengan pertanyaan Anda.',
         quoted: msg
@@ -41,7 +44,7 @@ export default {
     await conn.sendMessage(chatId, { react: { text: "🕋", key: msg.key } });
 
     try {
-      const apiUrl = `https://izumiiiiiiii.dpdns.org/ai/muslim-ai?text=${encodeURIComponent(question)}`;
+      const apiUrl = `https://izumiiiiiiii.dpdns.org/ai/muslim-ai?text=${encodeURIComponent(query)}`;
       const { data } = await axios.get(apiUrl);
 
       let replyText = (data && data.message) ? data.message : "❌ Tidak ada jawaban dari Muslim AI.";
@@ -56,5 +59,7 @@ export default {
         quoted: msg
       });
     }
-  }
+  },
+
+  isMuslimAiOn,
 };
