@@ -4,8 +4,8 @@ export default {
   tags: 'Nsfw Menu',
   desc: 'Send random NSFW image',
   prefix: true,
-  owner: false,
-  premium: false,
+  owner: true,
+  premium: true,
   run: async (conn, msg, { chatInfo }) => {
     const attachments = [
       "https://media.discordapp.net/attachments/480750844363538433/682844580265197608/yande.re_492406_sample_anus_ass_breasts_cum_fellatio_gangbang_handjob_heels_horns_maid_no_bra_nopan_.jpg",
