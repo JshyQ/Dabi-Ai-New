@@ -1,5 +1,5 @@
 /*  
- * Create By JoshyQzez  
+ * Create By JoshyQzeq 
  * © 2025  
  */
 
