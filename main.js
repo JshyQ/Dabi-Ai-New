@@ -19,9 +19,6 @@ import Cc from "./session/setCfg.js";
 import { cekSholat } from "./toolkit/pengingat.js";
 import emtData from "./toolkit/transmitter.js";
 
-// === ADD: Import MuslimAI plugin for toggle support ===
-import muslimAiPlugin from "./plugins/muslimai.js";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -39,6 +36,13 @@ global.plugins = {};
 global.categories = {};
 global.lidCache = {};
 global.initDB();
+
+// --- MuslimAI toggle state (per chat) ---
+const muslimAiState = {};
+function isMuslimAiOn(chatId) {
+  // Default ON
+  return muslimAiState[chatId] !== false;
+}
 
 setInterval(async () => {
   const now = Date.now();
@@ -169,9 +173,21 @@ const startBot = async () => {
       if (!textMessage && !mediaInfo) return;
 
       
+      if (
+        (textMessage?.toLowerCase?.().startsWith(".muslimai ") || textMessage?.toLowerCase?.().startsWith(".muslim-ai ")) &&
+        (textMessage?.split(" ")[1] === "on" || textMessage?.split(" ")[1] === "off")
+      ) {
+        const toggle = textMessage.split(" ")[1].toLowerCase();
+        muslimAiState[chatId] = toggle === "on";
+        await conn.sendMessage(chatId, {
+          text: `🧕🏻 Fitur MuslimAI auto-reply telah *${toggle === "on" ? "diaktifkan" : "dinonaktifkan"}* untuk chat ini.`,
+          quoted: msg
+        });
+        return;
+      }
+
+      
       try {
-        
-  
         const ctxInfo = msg.message?.extendedTextMessage?.contextInfo;
         const isReplyToBot =
           ctxInfo &&
@@ -181,12 +197,10 @@ const startBot = async () => {
             (ctxInfo.participant || "").includes(botNumber.split("@")[0])
           );
 
-        
         if (isReplyToBot && !textMessage.startsWith(".")) {
-        
-          if (!muslimAiPlugin.isMuslimAiOn(chatId)) return;
-
           
+          if (!isMuslimAiOn(chatId)) return;
+
           await conn.sendMessage(chatId, { react: { text: "🕋", key: msg.key } });
 
           try {
@@ -202,10 +216,10 @@ const startBot = async () => {
               quoted: msg
             });
           }
-          return; 
+          return;
         }
       } catch (err) {
-      
+        
       }
       
 
@@ -234,7 +248,6 @@ const startBot = async () => {
           }
         }
       }
-     
 
       const msgId = msg.key?.id;
       if (["conversation", "extendedTextMessage", "imageMessage", "videoMessage"].some((t) => msg.message?.[t])) {
