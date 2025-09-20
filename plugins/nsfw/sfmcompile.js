@@ -14,15 +14,21 @@ export default {
     const { chatId } = chatInfo;
     const keyword = args.join(" ").trim().toLowerCase();
 
-    
     await conn.sendMessage(chatId, { react: { text: "🔍", key: msg.key } });
 
     try {
       
-      const response = await axios.get('https://sfmcompile.club/');
-      const $ = cheerio.load(response.data);
+      const response = await axios.get('https://sfmcompile.club/', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+          'Accept-Language': 'en-US,en;q=0.9'
+        }
+      });
 
       
+
+      const $ = cheerio.load(response.data);
+
       const videoItems = [];
       $('a').each((i, el) => {
         const href = $(el).attr('href');
@@ -35,7 +41,9 @@ export default {
         }
       });
 
-      
+     
+      console.log("Found videoItems:", videoItems.length);
+
       let filteredVideos = videoItems;
       if (keyword) {
         filteredVideos = videoItems.filter(video =>
@@ -47,60 +55,8 @@ export default {
         await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
         return conn.sendMessage(
           chatId,
-          { text: '❌ Tidak ditemukan video dengan keyword tersebut.', quoted: msg }
+          { text: `❌ Tidak ditemukan video dengan keyword tersebut.\n\nFound total: ${videoItems.length}`, quoted: msg }
         );
       }
 
-      
-      const randomVideo = filteredVideos[Math.floor(Math.random() * filteredVideos.length)];
-      let vidPage;
-      try {
-        vidPage = await axios.get(randomVideo.url);
-      } catch (err) {
-        await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
-        return conn.sendMessage(
-          chatId,
-          { text: '❌ Gagal membuka halaman video.', quoted: msg }
-        );
-      }
-      const $$ = cheerio.load(vidPage.data);
-      let videoSrc = $$('video source').attr('src') || $$('video').attr('src');
-
-      if (!videoSrc) {
-        await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
-        return conn.sendMessage(
-          chatId,
-          { text: '❌ Tidak dapat menemukan video pada halaman.', quoted: msg }
-        );
-      }
-
-      
-      videoSrc = videoSrc.startsWith('http') ? videoSrc : `https://sfmcompile.club${videoSrc}`;
-
-      
-      if (!/^https?:\/\/.+/.test(videoSrc)) {
-        await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
-        return conn.sendMessage(
-          chatId,
-          { text: '❌ URL video tidak valid.', quoted: msg }
-        );
-      }
-
-      
-      await conn.sendMessage(chatId, {
-        video: { url: videoSrc },
-        caption: randomVideo.title
-      }, { quoted: msg });
-
-      await conn.sendMessage(chatId, { react: { text: "✅", key: msg.key } });
-
-    } catch (err) {
-      console.error('SFM API Error:', err?.response?.data ?? err);
-      await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
-      await conn.sendMessage(
-        chatId,
-        { text: '❌ Gagal mengambil video dari website.', quoted: msg }
-      );
-    }
-  }
-};
+     
