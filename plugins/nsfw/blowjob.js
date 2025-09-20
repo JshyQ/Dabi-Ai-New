@@ -4,8 +4,8 @@ export default {
   tags: 'Nsfw Menu',
   desc: 'Send random NSFW image',
   prefix: true,
-  owner: false,
-  premium: false,
+  owner: true,
+  premium: true,
   run: async (conn, msg, { chatInfo }) => {
     const attachments = [
       "https://konachan.com/sample/79580dfece36d208c76d55fe22ca21ec/Konachan.com%20-%20316451%20sample.jpg",
