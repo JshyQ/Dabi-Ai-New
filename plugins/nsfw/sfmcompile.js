@@ -53,7 +53,16 @@ export default {
 
       
       const randomVideo = filteredVideos[Math.floor(Math.random() * filteredVideos.length)];
-      const vidPage = await axios.get(randomVideo.url);
+      let vidPage;
+      try {
+        vidPage = await axios.get(randomVideo.url);
+      } catch (err) {
+        await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
+        return conn.sendMessage(
+          chatId,
+          { text: '❌ Gagal membuka halaman video.', quoted: msg }
+        );
+      }
       const $$ = cheerio.load(vidPage.data);
       let videoSrc = $$('video source').attr('src') || $$('video').attr('src');
 
@@ -67,6 +76,15 @@ export default {
 
       
       videoSrc = videoSrc.startsWith('http') ? videoSrc : `https://sfmcompile.club${videoSrc}`;
+
+      
+      if (!/^https?:\/\/.+/.test(videoSrc)) {
+        await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
+        return conn.sendMessage(
+          chatId,
+          { text: '❌ URL video tidak valid.', quoted: msg }
+        );
+      }
 
       
       await conn.sendMessage(chatId, {
