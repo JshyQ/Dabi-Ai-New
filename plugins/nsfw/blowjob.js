@@ -4,7 +4,7 @@ export default {
   tags: 'Nsfw Menu',
   desc: 'Send random NSFW image',
   prefix: true,
-  owner: true,
+  owner: false,
   premium: true,
   run: async (conn, msg, { chatInfo }) => {
     const attachments = [
