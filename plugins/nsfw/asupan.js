@@ -4,8 +4,8 @@ export default {
   tags: 'Nsfw Menu',
   desc: 'Send random NSFW image',
   prefix: true,
-  owner: false,
-  premium: false,
+  owner: true,
+  premium: true,
   run: async (conn, msg, { chatInfo }) => {
     const attachments = [
       "https://media.discordapp.net/attachments/530635618003451904/683209653261303808/yande.re_613351_sample_ass_azur_lane_cameltoe_damao_yu_feet_pantsu_stockings_taihou_azur_lane_thighh.jpg",
