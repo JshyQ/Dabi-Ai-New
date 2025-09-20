@@ -4,7 +4,7 @@ export default {
   tags: 'Tools',
   desc: 'Search nhentai',
   prefix: true,
-  owner: true,
+  owner: false,
   premium: true,
   run: async (conn, msg, { chatInfo, args }) => {
     const { chatId } = chatInfo;
