@@ -4,8 +4,8 @@ export default {
   tags: 'Nsfw Menu',
   desc: 'Scrape nHentai data',
   prefix: true,
-  owner: true,
-  premium: true,
+  owner: false,
+  premium: false,
   nHentai
 }
 
