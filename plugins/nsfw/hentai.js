@@ -6,8 +6,8 @@ export default {
   tags: 'Nsfw Menu',
   desc: 'Random hentai video',
   prefix: true,
-  owner: false,
-  premium: false,
+  owner: true,
+  premium: true,
 
   run: async (conn, msg, { chatInfo }) => {
     const { chatId } = chatInfo;
