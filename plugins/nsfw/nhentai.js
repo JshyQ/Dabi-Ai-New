@@ -6,7 +6,7 @@ export default {
   prefix: true,
   owner: false,
   premium: false,
-  nHentai
+
 }
 
 const { fetch } = require('undici');
