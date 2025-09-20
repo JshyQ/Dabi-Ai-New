@@ -30,7 +30,6 @@ const store = makeInMemoryStore();
 
 let conn;
 
-
 const botNumber = globalSetting?.botNumber || process.env.BOT_NUMBER || "6287865843362@s.whatsapp.net";
 
 global.plugins = {};
@@ -166,7 +165,50 @@ const startBot = async () => {
       const { textMessage, mediaInfo } = messageContent(msg);
       if (!textMessage && !mediaInfo) return;
 
+
+      try {
+        const quoted = msg.message?.extendedTextMessage?.contextInfo?.participant
+          || msg.message?.extendedTextMessage?.contextInfo?.stanzaId
+          || msg.message?.conversation?.contextInfo?.participant
+          || msg.quoted?.sender;
+        const quotedMsgId = msg.message?.extendedTextMessage?.contextInfo?.stanzaId
+          || msg.message?.conversation?.contextInfo?.stanzaId
+          || msg.quoted?.id;
+
+        
+        if (
+          !textMessage.startsWith(".") &&
+          msg.message?.extendedTextMessage?.contextInfo &&
+          (
+            msg.message.extendedTextMessage.contextInfo.participant === botNumber ||
+            msg.message.extendedTextMessage.contextInfo.participant === conn.user?.id ||
+            (msg.message.extendedTextMessage.contextInfo.participant || "").includes(botNumber.split("@")[0])
+          )
+        ) {
+          
+          await conn.sendMessage(chatId, { react: { text: "🕋", key: msg.key } });
+
+          
+          try {
+            const apiUrl = `https://izumiiiiiiii.dpdns.org/ai/muslim-ai?text=${encodeURIComponent(textMessage)}`;
+            const { data } = await axios.get(apiUrl);
+            const replyText = (data && data.message) ? data.message : "❌ Tidak ada jawaban dari Muslim AI.";
+            await conn.sendMessage(chatId, { text: replyText, quoted: msg });
+            await conn.sendMessage(chatId, { react: { text: "🧕🏻", key: msg.key } });
+          } catch (error) {
+            await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
+            await conn.sendMessage(chatId, {
+              text: '❌ Gagal mendapatkan jawaban dari Muslim AI.',
+              quoted: msg
+            });
+          }
+          return; 
+        }
+      } catch (err) {
+        
+      }
       
+
       if (isGroup) {
         const db = getDB();
         const gcKey = Object.keys(db.Grup || {}).find(k => db.Grup[k].Id === chatId);
