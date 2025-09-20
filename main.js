@@ -11,13 +11,16 @@ import readline from "readline";
 import { Boom } from "@hapi/boom";
 import { makeWASocket, useMultiFileAuthState, DisconnectReason } from "@whiskeysockets/baileys";
 import { fileURLToPath } from "url";
-import axios from "axios"; // <-- NEW: Import axios for API calls
+import axios from "axios";
 
 import globalSetting from "./toolkit/setting.js";
 import makeInMemoryStore from "./toolkit/store.js";
 import Cc from "./session/setCfg.js";
 import { cekSholat } from "./toolkit/pengingat.js";
 import emtData from "./toolkit/transmitter.js";
+
+// === ADD: Import MuslimAI plugin for toggle support ===
+import muslimAiPlugin from "./plugins/muslimai.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -165,30 +168,27 @@ const startBot = async () => {
       const { textMessage, mediaInfo } = messageContent(msg);
       if (!textMessage && !mediaInfo) return;
 
-
+      
       try {
-        const quoted = msg.message?.extendedTextMessage?.contextInfo?.participant
-          || msg.message?.extendedTextMessage?.contextInfo?.stanzaId
-          || msg.message?.conversation?.contextInfo?.participant
-          || msg.quoted?.sender;
-        const quotedMsgId = msg.message?.extendedTextMessage?.contextInfo?.stanzaId
-          || msg.message?.conversation?.contextInfo?.stanzaId
-          || msg.quoted?.id;
+        
+  
+        const ctxInfo = msg.message?.extendedTextMessage?.contextInfo;
+        const isReplyToBot =
+          ctxInfo &&
+          (
+            ctxInfo.participant === botNumber ||
+            ctxInfo.participant === conn.user?.id ||
+            (ctxInfo.participant || "").includes(botNumber.split("@")[0])
+          );
 
         
-        if (
-          !textMessage.startsWith(".") &&
-          msg.message?.extendedTextMessage?.contextInfo &&
-          (
-            msg.message.extendedTextMessage.contextInfo.participant === botNumber ||
-            msg.message.extendedTextMessage.contextInfo.participant === conn.user?.id ||
-            (msg.message.extendedTextMessage.contextInfo.participant || "").includes(botNumber.split("@")[0])
-          )
-        ) {
+        if (isReplyToBot && !textMessage.startsWith(".")) {
+        
+          if (!muslimAiPlugin.isMuslimAiOn(chatId)) return;
+
           
           await conn.sendMessage(chatId, { react: { text: "🕋", key: msg.key } });
 
-          
           try {
             const apiUrl = `https://izumiiiiiiii.dpdns.org/ai/muslim-ai?text=${encodeURIComponent(textMessage)}`;
             const { data } = await axios.get(apiUrl);
@@ -205,7 +205,7 @@ const startBot = async () => {
           return; 
         }
       } catch (err) {
-        
+      
       }
       
 
