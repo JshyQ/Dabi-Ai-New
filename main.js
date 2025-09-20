@@ -37,12 +37,6 @@ global.categories = {};
 global.lidCache = {};
 global.initDB();
 
-// --- MuslimAI toggle state (per chat) ---
-const muslimAiState = {};
-function isMuslimAiOn(chatId) {
-  // Default ON
-  return muslimAiState[chatId] !== false;
-}
 
 setInterval(async () => {
   const now = Date.now();
