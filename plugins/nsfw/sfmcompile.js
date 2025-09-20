@@ -7,8 +7,8 @@ export default {
   tags: 'Nsfw Menu',
   desc: 'Send a random SFM video from sfmcompile.club, supports keyword search.',
   prefix: true,
-  owner: false,
-  premium: false,
+  owner: true,
+  premium: true,
 
   run: async (conn, msg, { chatInfo, args }) => {
     const { chatId } = chatInfo;
