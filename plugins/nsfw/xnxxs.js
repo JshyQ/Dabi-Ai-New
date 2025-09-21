@@ -33,7 +33,7 @@ export default {
       }
 
       
-      const results = data.result.slice(0, 3);
+      const results = data.result.slice(0, 5);
       for (const vid of results) {
         let caption = `*${vid.title}*\nDuration: ${vid.duration}\nViews: ${vid.views}\nUploader: ${vid.uploader}\n[🔗 Watch](${vid.link})`;
         await conn.sendMessage(
