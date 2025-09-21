@@ -1,8 +1,5 @@
 import axios from "axios";
 
-
-const searchSessions = {};
-
 export default {
   name: "xnxxs",
   command: ["xnxxs"],
@@ -15,31 +12,40 @@ export default {
   run: async (conn, msg, { chatInfo, args }) => {
     const { chatId } = chatInfo;
     const query = args.join(" ");
+
     if (!query) {
-      return conn.sendMessage(chatId, { text: '❌ Masukkan keyword!\nContoh: .xnxxs anal' }, { quoted: msg });
+      return conn.sendMessage(
+        chatId,
+        { text: '❌ Masukkan keyword untuk pencarian!\nContoh: .xnxxs anal' },
+        { quoted: msg }
+      );
     }
 
     await conn.sendMessage(chatId, { react: { text: "🔍", key: msg.key } });
 
     try {
-      const api = `https://api.lolhuman.xyz/api/xnxxsearch?apikey=0a356668979c77065fcf741b&query=${encodeURIComponent(query)}`;
+      const api = `https://api.lolhuman.xyz/api/xnxxsearch?apikey=ce56fdf6eed4efacf91050ea&query=${encodeURIComponent(query)}`;
       const { data } = await axios.get(api);
 
       if (!data || data.status !== 200 || !data.result || data.result.length === 0) {
         await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
-        return conn.sendMessage(chatId, { text: "❌ Tidak ditemukan video.", quoted: msg });
+        return conn.sendMessage(chatId, { text: "❌ Tidak ditemukan video dengan keyword tersebut.", quoted: msg });
       }
 
-      const results = data.result.slice(0, 5);
-      let listText = `*Hasil pencarian untuk:* _${query}_\n\n`;
-      results.forEach((vid, i) => {
-        listText += `${i + 1}. *${vid.title}*\nUploader: ${vid.uploader}\nDurasi: ${vid.duration}\nViews: ${vid.views}\nBalas dengan *${i + 1}* untuk download video ini\n\n`;
-      });
+      
+      const results = data.result.slice(0, 3);
+      for (const vid of results) {
+        let caption = `*${vid.title}*\nDuration: ${vid.duration}\nViews: ${vid.views}\nUploader: ${vid.uploader}\n[🔗 Watch](${vid.link})`;
+        await conn.sendMessage(
+          chatId,
+          {
+            image: { url: vid.thumbnail },
+            caption,
+          },
+          { quoted: msg }
+        );
+      }
 
-    
-      searchSessions[msg.key.id] = results;
-
-      await conn.sendMessage(chatId, { text: listText }, { quoted: msg });
       await conn.sendMessage(chatId, { react: { text: "✅", key: msg.key } });
 
     } catch (e) {
@@ -47,6 +53,4 @@ export default {
       await conn.sendMessage(chatId, { text: "❌ Gagal mengambil hasil pencarian.", quoted: msg });
     }
   },
-  
-  searchSessions,
 };
