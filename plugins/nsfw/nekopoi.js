@@ -1,5 +1,14 @@
 import axios from 'axios';
 
+export default {
+  name: 'hentai',
+  command: ['hentai'],
+  tags: 'Nsfw Menu',
+  desc: 'Nekopoi Video',
+  prefix: true,
+  owner: false,
+  premium: false,
+
 class Kucing {
     constructor() {
         this.client = axios.create({
