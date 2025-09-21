@@ -14,10 +14,10 @@ export default {
     const { chatId } = chatInfo;
     const keyword = args.join(" ").trim().toLowerCase();
 
+    
     await conn.sendMessage(chatId, { react: { text: "🔍", key: msg.key } });
 
     try {
-      
       const response = await axios.get('https://sfmcompile.club/', {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
@@ -25,24 +25,19 @@ export default {
         }
       });
 
-      
-
       const $ = cheerio.load(response.data);
 
       const videoItems = [];
       $('a').each((i, el) => {
         const href = $(el).attr('href');
-        const title = $(el).text() || "";
-        if (href && href.startsWith('/video/') && title) {
+        const title = $(el).text()?.trim() || "";
+        if (href && href.startsWith('/video/') && title.length > 3) {
           videoItems.push({
             url: `https://sfmcompile.club${href}`,
             title: title.toLowerCase()
           });
         }
       });
-
-     
-      console.log("Found videoItems:", videoItems.length);
 
       let filteredVideos = videoItems;
       if (keyword) {
@@ -59,4 +54,42 @@ export default {
         );
       }
 
-     
+      
+      const selected = filteredVideos[Math.floor(Math.random() * filteredVideos.length)];
+
+      
+      const detail = await axios.get(selected.url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+          'Accept-Language': 'en-US,en;q=0.9'
+        }
+      });
+      const $$ = cheerio.load(detail.data);
+
+    
+      const videoSrc = $$("video source").attr("src");
+      const poster = $$("video").attr("poster");
+
+      let caption = `*${selected.title.trim()}*\n[🔗 Buka Video](${selected.url})`;
+      if (videoSrc) caption += `\n[▶️ Direct Video](${videoSrc})`;
+
+      
+      if (poster) {
+        await conn.sendMessage(chatId, {
+          image: { url: poster },
+          caption,
+        }, { quoted: msg });
+      } else {
+        await conn.sendMessage(chatId, {
+          text: caption,
+        }, { quoted: msg });
+      }
+
+      
+      await conn.sendMessage(chatId, { react: { text: "✔️", key: msg.key } });
+    } catch (e) {
+      await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
+      await conn.sendMessage(chatId, { text: "❌ Gagal mengambil video.", quoted: msg });
+    }
+  }
+};
