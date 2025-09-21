@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 export default {
-  name: 'hentai',
-  command: ['hentai'],
+  name: 'nekopoi',
+  command: ['neko'],
   tags: 'Nsfw Menu',
   desc: 'Nekopoi Video',
   prefix: true,
