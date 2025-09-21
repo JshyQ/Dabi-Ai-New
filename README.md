@@ -1,16 +1,8 @@
-# <div align='center'>Dabi-Ai-WhastApp</div>
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/maoudabi0/Dabi-Ai-Documentation/main/assets/Dabi-Ai.png">
 </p>
 
 - - -
-
-## Hi Everyone
-   Hari yang menyenangkan teman-teman. Kali ini saya akan memberikan sebuah informasi tentang Script Dabi-Ai ini, ini adalah sebuah Script Dabi-Ai/Base Bot WhatsApp,  dalam rangkaian kali ini saya benar-benar berterima kasih kepada kalian yang menggunakan Script ini.
-
-   Tentu saja Script ini bisa terhubung dengan akun/nomor WhatsApp anda, Berikut adalah beberapa spesifikasi tentang Script Dabi-Ai ini:
-
 - Suport Termux
 - Ringan
 - Type Plugins
@@ -124,24 +116,4 @@ Salin atau ketik promt seperti yang ada di bawah ini di termux
 5. Connection Save
 
    jalankan dan masukan nomor/akun whatsapp yang akan dijadikan Bot WhatsApp, jika code pairing sudah muncul, masukan code pairing tersebut ke Perangkat tertaut.<br>
-   Dan selamat Bot berhasil di jalankan. 
-
-- - -
-
-# Dabi-Ai-Documentation
-[![iTasks](https://github-readme-stats.vercel.app/api/pin/?username=maoudabi0&repo=Dabi-Ai-Documentation&border_color=7F3FBF&bg_color=FFFFFF&title_color=010101&text_color=8B949E&icon_color=7F3FBF)](https://github.com/maoudabi0/Dabi-Ai-Documentation)
-
-- - -
-
-## Request & Fix 
-<details>
-  <summary>Help Dabi</summary>
-    Email: maoudabioffc@gmail.com
-</details>
-
-# (C)
-<div align="left">
-    <img src="https://img.shields.io/badge/Realese%3A-2025-0?logoSize=12&labelColor=orange&color=gray" alt="Release Badge">
-    <br>
-    <img src="https://img.shields.io/badge/Create%3A-Maou_Dabi-0?logoSize=12&label=Create%3A&labelColor=green&color=grey" alt="Create Badge">
-</div>
+   Dan selamat Bot berhasil di jalankan.
