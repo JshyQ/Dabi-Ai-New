@@ -1,20 +1,10 @@
 import axios from "axios";
 import cheerio from "cheerio";
 
-export default {
-  name: "randomhwa",
-  command: ["randomhwa"],
-  tags: "nsfw",
-  desc: "Get a random trending Pornhwa comic with a cover and PDF link.",
-  prefix: true,
-  owner: false,
-  premium: false,
 
 async function getRandomTrendingPornhwa() {
-  
   const { data } = await axios.get("https://pornhwa.me/trending/");
   const $ = cheerio.load(data);
-
 
   const comics = [];
   $(".bsx").each((i, el) => {
@@ -28,13 +18,11 @@ async function getRandomTrendingPornhwa() {
 
   if (!comics.length) throw new Error("No comics found.");
 
-  
   const comic = comics[Math.floor(Math.random() * comics.length)];
 
   const { data: detailHtml } = await axios.get(comic.detail);
   const $$ = cheerio.load(detailHtml);
 
-  
   let pdf = "";
   $$(".eplister a, .wp-manga-chapter a, .btn, .download, .dls a").each((i, elem) => {
     const text = $$(elem).text().toLowerCase();
@@ -44,7 +32,6 @@ async function getRandomTrendingPornhwa() {
     }
   });
 
-  
   return {
     title: comic.title,
     cover: comic.cover,
@@ -53,8 +40,16 @@ async function getRandomTrendingPornhwa() {
   };
 }
 
+export default {
+  name: "randomhwa",
+  command: ["randomhwa"],
+  tags: "nsfw",
+  desc: "Get a random trending Pornhwa comic with a cover and PDF link.",
+  prefix: true,
+  owner: false,
+  premium: false,
 
-  run: async (conn, msg, { chatInfo, args }) => {
+  run: async (conn, msg, { chatInfo }) => {
     const { chatId } = chatInfo;
 
     
