@@ -3,7 +3,7 @@ import axios from "axios";
 export default {
   name: "resep",
   command: ["resep"],
-  tags: "Tools",
+  tags: "Tools Menu",
   desc: "Cari resep masakan",
   prefix: true,
   owner: false,
