@@ -85,9 +85,9 @@ class Kucing {
     }
 }
 
-export const command = ['kucinglatest'];
+export const command = ['neko'];
 export const tags = ['tools'];
-export const help = ['kucinglatest - Get latest kucing content'];
+export const help = ['neko - Get latest neko content'];
 
 export async function run(conn, msg, { chatInfo, args }) {
     const { chatId } = chatInfo;
@@ -108,6 +108,6 @@ export async function run(conn, msg, { chatInfo, args }) {
         await conn.sendMessage(chatId, { react: { text: "✅", key: msg.key } });
     } catch (e) {
         await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
-        await conn.sendMessage(chatId, { text: "❌ Gagal mengambil data kucing." }, { quoted: msg });
+        await conn.sendMessage(chatId, { text: "❌ Gagal mengambil data neko." }, { quoted: msg });
     }
 }
