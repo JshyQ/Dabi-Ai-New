@@ -25,23 +25,22 @@ export default {
     try {
       const api = `https://api.siputzx.my.id/api/sticker/stickerly-search?query=${encodeURIComponent(query)}`;
       const { data } = await axios.get(api, {
-        headers: { "api_key": "ce56fdf6eed4efacf91050ea" }
+        headers: { "accept": "*/*" }
       });
 
-      if (!data || !data.result || data.result.length === 0) {
+      if (!data || !data.data || data.data.length === 0) {
         await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
         return conn.sendMessage(chatId, { text: "❌ Tidak ada sticker ditemukan.", quoted: msg });
       }
 
-      
-      const results = data.result.slice(0, 5);
+      const results = data.data.slice(0, 5);
       for (const pack of results) {
-        let caption = `*${pack.title}*\nAuthor: ${pack.author}\nTotal Sticker: ${pack.stickers}\n[🔗 Open Stickerly](${pack.url})`;
+        let caption = `*${pack.name}*\nAuthor: ${pack.author}\nTotal Sticker: ${pack.stickerCount}\n[🔗 Open Stickerly](${pack.url})`;
 
         await conn.sendMessage(
           chatId,
           {
-            image: { url: pack.image },
+            image: { url: pack.thumbnailUrl },
             caption,
           },
           { quoted: msg }
