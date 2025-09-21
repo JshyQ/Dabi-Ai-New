@@ -1,6 +1,14 @@
 import axios from "axios";
 import cheerio from "cheerio";
 
+export default {
+  name: 'hentai',
+  command: ['randomhwa'],
+  tags: 'Nsfw Menu',
+  desc: 'Random hentai video',
+  prefix: true,
+  owner: false,
+  premium: false,
 
 async function getRandomTrendingPornhwa() {
   
