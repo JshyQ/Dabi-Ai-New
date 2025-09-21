@@ -1,115 +1,57 @@
-import { fetch } from 'undici';
-import cheerio from 'cheerio';
+import { PornHub } from 'pornhub.js';
 
-class Xnxx {
+class Ph {
+    constructor() {
+        this.client = new PornHub();
+    }
+
     async search(query) {
         try {
-            const page = Math.floor(3 * Math.random()) + 1;
-            const resp = await fetch(`https://www.xnxx.com/search/${encodeURIComponent(query)}/${page}`);
-            const $ = cheerio.load(await resp.text());
-
-            const results = [];
-            $('div[id*="video"]').each((_, bkp) => {
-                const title = $(bkp).find('.thumb-under p:nth-of-type(1) a').text().trim();
-                const views = $(bkp).find('.thumb-under p.metadata span.right').contents().not('span.superfluous').text().trim();
-                const resolution = $(bkp).find('.thumb-under p.metadata span.video-hd').contents().not('span.superfluous').text().trim();
-                const duration = $(bkp).find('.thumb-under p.metadata').contents().not('span').text().trim();
-                const cover = $(bkp).find('.thumb-inside .thumb img').attr('data-src');
-                let url = $(bkp).find('.thumb-inside .thumb a').attr('href');
-                if (url) url = url.replace("/THUMBNUM/", "/");
-
-                if (url && title) {
-                    results.push({
-                        title,
-                        views,
-                        resolution,
-                        duration,
-                        cover,
-                        url: `https://xnxx.com${url}`
-                    });
-                }
-            });
-
-            return results;
-        } catch (error) {
-            throw new Error(error.message);
-        }
-    }
-
-    async download(url) {
-        try {
-            const resp = await fetch(url);
-            const $ = cheerio.load(await resp.text());
-
+            const results = await this.client.searchVideo(query);
+            if (!results.data || results.data.length === 0) return [];
             
-            let scriptContent = '';
-            $('script').each((_, el) => {
-                const html = $(el).html();
-                if (html && html.includes('html5player.setVideoUrlLow')) {
-                    scriptContent = html;
-                }
-            });
-
-            const extractData = (regex) => (scriptContent.match(regex) || [])[1] || null;
-
-            const videos = {
-                low: extractData(/html5player\.setVideoUrlLow\('(.*?)'\);/),
-                high: extractData(/html5player\.setVideoUrlHigh\('(.*?)'\);/),
-                HLS: extractData(/html5player\.setVideoHLS\('(.*?)'\);/)
-            }
-
-            const thumb = extractData(/html5player\.setThumbUrl\('(.*?)'\);/);
-
-            return {
-                videos,
-                thumb
-            };
+            return results.data.sort(() => Math.random() - 0.5);
         } catch (error) {
             throw new Error(error.message);
         }
     }
+    
 }
 
 export default {
-    name: 'xnxx',
-    command: ['xnxx'],
+    name: 'ph',
+    command: ['ph'],
     tags: 'Nsfw Menu',
-    desc: 'Send a random XNXX video by keyword search.',
+    desc: 'Search PornHub and send a random video result for the given keyword.',
     prefix: true,
     owner: false,
     premium: false,
 
     run: async (conn, msg, { chatInfo, args }) => {
         const { chatId } = chatInfo;
-        const input = args.join(" ");
-        if (!input) {
+        const query = args.join(" ");
+        if (!query) {
             return conn.sendMessage(chatId, {
-                text: '❌ Masukkan keyword untuk mencari video!\nContoh: .xnxx japanese',
+                text: '❌ Masukkan keyword pencarian!\nContoh: .ph japanese',
             }, { quoted: msg });
         }
 
         await conn.sendMessage(chatId, { react: { text: "🔍", key: msg.key } });
 
         try {
-            const xnxx = new Xnxx();
-            const results = await xnxx.search(input);
-            if (!results || results.length === 0) {
+            const ph = new Ph();
+            const results = await ph.search(query);
+            if (results.length === 0) {
                 await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
-                return conn.sendMessage(chatId, { text: '❌ Tidak ditemukan video untuk keyword tersebut.', quoted: msg });
+                return conn.sendMessage(chatId, { text: "❌ Tidak ditemukan video untuk keyword tersebut.", quoted: msg });
             }
-            const picked = results[Math.floor(Math.random() * results.length)];
+            const picked = results[0]; 
 
-            
-            const dl = await xnxx.download(picked.url);
-            const videoUrl = dl.videos.high || dl.videos.low || dl.videos.HLS;
-            const thumb = dl.thumb || picked.cover;
+            let caption = `*${picked.title}*\nUploader: ${picked.author?.name}\nDuration: ${picked.duration}\nViews: ${picked.views}\nRating: ${picked.rating}\n[🔗 Watch on PornHub](${picked.url})`;
 
-            let caption = `*${picked.title}*\nDuration: ${picked.duration}\nViews: ${picked.views}\nResolution: ${picked.resolution}\n[🔗 Buka Video](${picked.url})`;
-            if (videoUrl) caption += `\n[▶️ Direct Video](${videoUrl})`;
-
-            if (thumb) {
+            if (picked.thumb) {
                 await conn.sendMessage(chatId, {
-                    image: { url: thumb },
+                    image: { url: picked.thumb },
                     caption,
                 }, { quoted: msg });
             } else {
@@ -119,10 +61,9 @@ export default {
             }
 
             await conn.sendMessage(chatId, { react: { text: "✅", key: msg.key } });
-
-        } catch (err) {
+        } catch (error) {
             await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
-            await conn.sendMessage(chatId, { text: '❌ Gagal mengambil video dari XNXX.', quoted: msg });
+            await conn.sendMessage(chatId, { text: `❌ Gagal mencari video.\n${error.message}` }, { quoted: msg });
         }
     }
 };
