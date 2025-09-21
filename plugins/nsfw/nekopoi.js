@@ -9,7 +9,7 @@ export default {
   owner: false,
   premium: false,
 
-class Kucing {
+class neko {
     constructor() {
         this.client = axios.create({
             baseURL: 'https://api.explorethefrontierforlimitlessimaginationanddiscov.com/330cceade91a6a9cd30fb8042222ed56/71b8acf33b508c7543592acd9d9eb70d',
@@ -91,7 +91,7 @@ export const help = ['neko - Get latest neko content'];
 
 export async function run(conn, msg, { chatInfo, args }) {
     const { chatId } = chatInfo;
-    const k = new Kucing();
+    const k = new neko();
     await conn.sendMessage(chatId, { react: { text: "⌛", key: msg.key } });
     try {
         const resp = await k.latest();
