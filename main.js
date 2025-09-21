@@ -19,45 +19,6 @@ import Cc from "./session/setCfg.js";
 import { cekSholat } from "./toolkit/pengingat.js";
 import emtData from "./toolkit/transmitter.js";
 
-import xnxxsPlugin from './plugins/xnxxs.js';
-
-async function handleMessage(conn, msg, chatInfo) {
-  
-  if (msg.quoted && xnxxsPlugin.searchSessions[msg.quoted.id]) {
-    const choice = parseInt(msg.body.trim(), 10);
-    if (!isNaN(choice)) {
-      const list = xnxxsPlugin.searchSessions[msg.quoted.id];
-      if (list[choice - 1]) {
-        const video = list[choice - 1];
-        await conn.sendMessage(chatInfo.chatId, { react: { text: "⏬", key: msg.key } });
-        
-        try {
-          const api = `https://api.lolhuman.xyz/api/xnxx?apikey=0a356668979c77065fcf741b&url=${encodeURIComponent(video.link)}`;
-          const { data } = await axios.get(api);
-          if (data && data.status === 200 && data.result) {
-            let dlMsg = `*${data.result.title}*\nDuration: ${data.result.duration}\nViews: ${data.result.view}\n\n`;
-            dlMsg += data.result.link.map(l => `• ${l.type}: ${l.link}`).join('\n');
-            await conn.sendMessage(chatInfo.chatId, {
-              image: { url: data.result.thumbnail },
-              caption: dlMsg,
-            }, { quoted: msg });
-            await conn.sendMessage(chatInfo.chatId, { react: { text: "✅", key: msg.key } });
-          } else {
-            throw new Error('API error');
-          }
-        } catch (e) {
-          await conn.sendMessage(chatInfo.chatId, { react: { text: "❌", key: msg.key } });
-          await conn.sendMessage(chatInfo.chatId, { text: "❌ Gagal download video!", quoted: msg });
-        }
-        return;
-      }
-    }
-  }
-
- 
-}
-
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
