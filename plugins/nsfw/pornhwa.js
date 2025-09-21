@@ -2,10 +2,10 @@ import axios from "axios";
 import cheerio from "cheerio";
 
 export default {
-  name: 'pornhwa',
-  command: ['randomhwa'],
-  tags: 'Nsfw Menu',
-  desc: 'Random pornhwa comics',
+  name: "randomhwa",
+  command: ["randomhwa"],
+  tags: "nsfw",
+  desc: "Get a random trending Pornhwa comic with a cover and PDF link.",
   prefix: true,
   owner: false,
   premium: false,
@@ -15,7 +15,7 @@ async function getRandomTrendingPornhwa() {
   const { data } = await axios.get("https://pornhwa.me/trending/");
   const $ = cheerio.load(data);
 
-  
+
   const comics = [];
   $(".bsx").each((i, el) => {
     const title = $(el).find(".tt").text().trim();
@@ -31,7 +31,6 @@ async function getRandomTrendingPornhwa() {
   
   const comic = comics[Math.floor(Math.random() * comics.length)];
 
-  
   const { data: detailHtml } = await axios.get(comic.detail);
   const $$ = cheerio.load(detailHtml);
 
@@ -55,28 +54,31 @@ async function getRandomTrendingPornhwa() {
 }
 
 
-export async function run(conn, msg, args, extra) {
-  
-  await conn.sendMessage(msg.chat, {
-    react: { text: "⌛", key: msg.key }
-  });
+  run: async (conn, msg, { chatInfo, args }) => {
+    const { chatId } = chatInfo;
 
-  try {
-    const comic = await getRandomTrendingPornhwa();
-    await conn.sendMessage(msg.chat, {
-      image: { url: comic.cover },
-      caption:
-        `*${comic.title}*\n\n[Read Online](${comic.detail})\n\n[📥 Download PDF](${comic.pdf})`,
-    }, { quoted: msg });
     
-    await conn.sendMessage(msg.chat, {
-      react: { text: "✔️", key: msg.key }
+    await conn.sendMessage(chatId, {
+      react: { text: "⌛", key: msg.key }
     });
-  } catch (e) {
-    
-    await conn.sendMessage(msg.chat, {
-      react: { text: "❌", key: msg.key }
-    });
-    await conn.sendMessage(msg.chat, { text: "❌ Gagal mengambil komik trending." }, { quoted: msg });
+
+    try {
+      const comic = await getRandomTrendingPornhwa();
+      await conn.sendMessage(chatId, {
+        image: { url: comic.cover },
+        caption:
+          `*${comic.title}*\n\n[Read Online](${comic.detail})\n\n[📥 Download PDF](${comic.pdf})`,
+      }, { quoted: msg });
+      
+      await conn.sendMessage(chatId, {
+        react: { text: "✔️", key: msg.key }
+      });
+    } catch (e) {
+      
+      await conn.sendMessage(chatId, {
+        react: { text: "❌", key: msg.key }
+      });
+      await conn.sendMessage(chatId, { text: "❌ Gagal mengambil komik trending." }, { quoted: msg });
+    }
   }
-}
+};
