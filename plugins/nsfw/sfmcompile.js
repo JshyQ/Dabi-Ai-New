@@ -5,7 +5,7 @@ export default {
   name: 'sfm',
   command: ['sfm'],
   tags: 'Nsfw Menu',
-  desc: 'Send a random SFM video from sfmcompile.club, supports keyword search.',
+  desc: 'Send a random SFM video from sfmcompile.club, or a random match for .sfm <keyword>.',
   prefix: true,
   owner: false,
   premium: false,
@@ -26,12 +26,12 @@ export default {
       });
       const $ = cheerio.load(response.data);
 
-    
+      
       const videos = [];
       $('a').each((i, el) => {
         const href = $(el).attr('href');
         const title = $(el).text().trim();
-      
+        
         if (
           href &&
           /^\/[a-zA-Z0-9\-]+\/$/.test(href) &&
@@ -49,9 +49,17 @@ export default {
       });
 
       
-      let filtered = videos;
+      const seen = new Set();
+      const uniqueVideos = videos.filter(item => {
+        if (seen.has(item.url)) return false;
+        seen.add(item.url);
+        return true;
+      });
+
+      
+      let filtered = uniqueVideos;
       if (keyword) {
-        filtered = videos.filter(v => v.title.toLowerCase().includes(keyword));
+        filtered = uniqueVideos.filter(v => v.title.toLowerCase().includes(keyword));
       }
 
       if (filtered.length === 0) {
@@ -65,7 +73,7 @@ export default {
       
       const selected = filtered[Math.floor(Math.random() * filtered.length)];
 
-      
+    
       const detail = await axios.get(selected.url, {
         headers: {
           'User-Agent': 'Mozilla/5.0',
@@ -79,7 +87,9 @@ export default {
       const poster = $$("video").attr("poster");
 
       let caption = `*${selected.title.trim()}*\n[🔗 Buka Video](${selected.url})`;
-      if (videoSrc) caption += `\n[▶️ Direct Video](${videoSrc})`;
+      if (videoSrc && videoSrc.endsWith('.mp4')) {
+        caption += `\n[📥 Download Video (mp4)](${videoSrc})`;
+      }
 
       
       if (poster) {
