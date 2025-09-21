@@ -2,10 +2,10 @@ import axios from "axios";
 import cheerio from "cheerio";
 
 export default {
-  name: 'hentai',
+  name: 'pornhwa',
   command: ['randomhwa'],
   tags: 'Nsfw Menu',
-  desc: 'Random hentai video',
+  desc: 'Random pornhwa comics',
   prefix: true,
   owner: false,
   premium: false,
