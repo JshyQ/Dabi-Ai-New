@@ -14,7 +14,7 @@ export default {
     const { chatId } = chatInfo;
     const keyword = args.join(" ").trim().toLowerCase();
 
-    
+  
     await conn.sendMessage(chatId, { react: { text: "🔍", key: msg.key } });
 
     try {
@@ -28,10 +28,20 @@ export default {
       const $ = cheerio.load(response.data);
 
       const videoItems = [];
+      
       $('a').each((i, el) => {
         const href = $(el).attr('href');
-        const title = $(el).text()?.trim() || "";
-        if (href && href.startsWith('/video/') && title.length > 3) {
+        const title = $(el).text().trim() || "";
+        if (
+          href &&
+          href.startsWith('/') &&
+          !href.startsWith('/category/') &&
+          !href.startsWith('/page/') &&
+          !href.startsWith('/tag/') &&
+          !href.startsWith('/author/') &&
+          href.length > 2 && 
+          title.length > 4   
+        ) {
           videoItems.push({
             url: `https://sfmcompile.club${href}`,
             title: title.toLowerCase()
@@ -39,9 +49,17 @@ export default {
         }
       });
 
-      let filteredVideos = videoItems;
+      
+      const seen = new Set();
+      const uniqueVideos = videoItems.filter(item => {
+        if (seen.has(item.url)) return false;
+        seen.add(item.url);
+        return true;
+      });
+
+      let filteredVideos = uniqueVideos;
       if (keyword) {
-        filteredVideos = videoItems.filter(video =>
+        filteredVideos = uniqueVideos.filter(video =>
           video.title.includes(keyword)
         );
       }
@@ -50,7 +68,7 @@ export default {
         await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
         return conn.sendMessage(
           chatId,
-          { text: `❌ Tidak ditemukan video dengan keyword tersebut.\n\nFound total: ${videoItems.length}`, quoted: msg }
+          { text: `❌ Tidak ditemukan video dengan keyword tersebut.\n\nFound total: ${uniqueVideos.length}`, quoted: msg }
         );
       }
 
@@ -66,7 +84,7 @@ export default {
       });
       const $$ = cheerio.load(detail.data);
 
-    
+      
       const videoSrc = $$("video source").attr("src");
       const poster = $$("video").attr("poster");
 
