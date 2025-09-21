@@ -4,7 +4,7 @@ import fs from 'fs';
 
 export default {
   name: 'stiker',
-  command: ['s', 'stiker', 'sticker'],
+  command: ['s'],
   tags: 'Tools Menu',
   desc: 'Membuat sticker',
   prefix: true,
@@ -18,7 +18,7 @@ export default {
 
     if (!isImage && !isVideo)
       return conn.sendMessage(chatId, {
-        text: 'Balas gambar/video dengan caption *s*, *stiker*, atau *sticker* ' +
+        text: 'Balas gambar/video dengan caption *s*' +
               'atau kirim langsung media dengan caption yang sama!'
       }, { quoted: msg });
 
