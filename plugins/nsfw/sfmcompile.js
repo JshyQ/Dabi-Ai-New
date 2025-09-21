@@ -14,71 +14,61 @@ export default {
     const { chatId } = chatInfo;
     const keyword = args.join(" ").trim().toLowerCase();
 
-  
-    await conn.sendMessage(chatId, { react: { text: "🔍", key: msg.key } });
+    await conn.sendMessage(chatId, { react: { text: "⌛", key: msg.key } });
 
     try {
+      
       const response = await axios.get('https://sfmcompile.club/', {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+          'User-Agent': 'Mozilla/5.0',
           'Accept-Language': 'en-US,en;q=0.9'
         }
       });
-
       const $ = cheerio.load(response.data);
 
-      const videoItems = [];
-      
+    
+      const videos = [];
       $('a').each((i, el) => {
         const href = $(el).attr('href');
-        const title = $(el).text().trim() || "";
+        const title = $(el).text().trim();
+      
         if (
           href &&
-          href.startsWith('/') &&
+          /^\/[a-zA-Z0-9\-]+\/$/.test(href) &&
           !href.startsWith('/category/') &&
-          !href.startsWith('/page/') &&
           !href.startsWith('/tag/') &&
+          !href.startsWith('/page/') &&
           !href.startsWith('/author/') &&
-          href.length > 2 && 
-          title.length > 4   
+          title.length > 3
         ) {
-          videoItems.push({
+          videos.push({
             url: `https://sfmcompile.club${href}`,
-            title: title.toLowerCase()
+            title
           });
         }
       });
 
       
-      const seen = new Set();
-      const uniqueVideos = videoItems.filter(item => {
-        if (seen.has(item.url)) return false;
-        seen.add(item.url);
-        return true;
-      });
-
-      let filteredVideos = uniqueVideos;
+      let filtered = videos;
       if (keyword) {
-        filteredVideos = uniqueVideos.filter(video =>
-          video.title.includes(keyword)
-        );
+        filtered = videos.filter(v => v.title.toLowerCase().includes(keyword));
       }
 
-      if (filteredVideos.length === 0) {
+      if (filtered.length === 0) {
         await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
-        return conn.sendMessage(
-          chatId,
-          { text: `❌ Tidak ditemukan video dengan keyword tersebut.\n\nFound total: ${uniqueVideos.length}`, quoted: msg }
-        );
+        return conn.sendMessage(chatId, {
+          text: `❌ Tidak ditemukan video dengan keyword tersebut.`,
+          quoted: msg
+        });
       }
 
       
-      const selected = filteredVideos[Math.floor(Math.random() * filteredVideos.length)];
+      const selected = filtered[Math.floor(Math.random() * filtered.length)];
 
       
       const detail = await axios.get(selected.url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+          'User-Agent': 'Mozilla/5.0',
           'Accept-Language': 'en-US,en;q=0.9'
         }
       });
@@ -103,7 +93,6 @@ export default {
         }, { quoted: msg });
       }
 
-      
       await conn.sendMessage(chatId, { react: { text: "✔️", key: msg.key } });
     } catch (e) {
       await conn.sendMessage(chatId, { react: { text: "❌", key: msg.key } });
