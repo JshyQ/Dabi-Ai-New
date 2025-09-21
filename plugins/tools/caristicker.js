@@ -3,7 +3,7 @@ import axios from "axios";
 export default {
   name: "caristicker",
   command: ["caristicker"],
-  tags: "Tools",
+  tags: "Tools Menu",
   desc: "Cari Stickerly",
   prefix: true,
   owner: false,
